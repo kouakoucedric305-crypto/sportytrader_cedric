@@ -1,20 +1,49 @@
-# ⚡ SportyPro CI — Site de Pronostics Sportifs
+# ⚽ SportyPro CI — Pronostics Football
 
-**Crédité par Kouakou Cedric · Saison 2026/2027**
+**Par Kouakou Cedric · Saison 2025/2026**
 
-Site de pronostics sportifs professionnel en Python/Flask, inspiré de SportyTrader.
-Données réelles via **TheSportsDB API** (gratuit, sans clé API).
+Application web Python/Flask de pronostics football avec données réelles via **football-data.org**.  
+Calendrier, classements, buteurs et pronostics statistiques (modèle Double-Poisson + forme + H2H).
 
 ---
 
-## 🏟️ Sports couverts
+## 🏆 Compétitions disponibles
 
-| Sport | Championnats |
-|-------|-------------|
-| ⚽ Football | Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League, MLS, AFCON, CAF |
-| 🏀 Basketball | NBA, Euroleague, WNBA |
-| 🎾 Tennis | ATP Tour, WTA Tour |
-| 🥊 MMA | UFC, Bellator MMA |
+Toutes gratuites avec la clé free-tier football-data.org :
+
+| Compétition | Code |
+|-------------|------|
+| Premier League | `PL` |
+| La Liga | `PD` |
+| Bundesliga | `BL1` |
+| Serie A | `SA` |
+| Ligue 1 | `FL1` |
+| Champions League | `CL` |
+| Eredivisie | `DED` |
+| Primeira Liga | `PPL` |
+| Championship | `ELC` |
+| Série A Brésil | `BSA` |
+| FA Cup | `FAC` |
+| DFB-Pokal | `DFB` |
+| Copa Libertadores | `CLI` |
+| Copa Sudamericana | `CS` |
+| Coupe du Monde 2026 | `WC` |
+| Qualifications WC (UEFA, CAF, AFC, CONMEBOL, CONCACAF) | — |
+
+> ⚠️ CAF/AFCON, MLS, Ligue 2 française → plan payant (€49/mois min.)
+
+---
+
+## 🧮 Moteur de pronostic
+
+Les pronostics sont générés automatiquement selon les données disponibles :
+
+- **Double-Poisson + classement** — ratings attaque/défense calculés depuis le classement de la ligue
+- **+ Forme récente** — pondération exponentielle des 5 derniers matchs (coefficient DECAY = 0.78)
+- **+ H2H** — facteur d'ajustement basé sur les 6 derniers duels directs
+- **Cotes indicatives** — calculées depuis les probabilités avec marge de 5.5 %
+
+Le niveau de confiance affiché reflète la quantité de données disponibles pour le calcul.
 
 ---
 
@@ -24,101 +53,95 @@ Données réelles via **TheSportsDB API** (gratuit, sans clé API).
 # 1. Installer les dépendances
 pip install -r requirements.txt
 
-# 2. Lancer le serveur
+# 2. Définir les variables d'environnement (optionnel, des valeurs par défaut existent)
+export FOOTBALLDATA_KEY=votre_cle
+export SECRET_KEY=votre_secret
+
+# 3. Lancer le serveur
 python app.py
 
-# 3. Ouvrir dans le navigateur
+# 4. Ouvrir dans le navigateur
 # http://localhost:5000
 ```
 
 ---
 
-## 🌐 Déploiement sur Render.com (GRATUIT)
+## 🌐 Déploiement sur Render.com (gratuit)
 
-**Render.com** est le meilleur hébergeur gratuit pour Python/Flask.
+### 1. Pousser sur GitHub
 
-### Étapes :
+```bash
+git init
+git add .
+git commit -m "SportyPro CI v3.0"
+git remote add origin https://github.com/TON_USERNAME/sportypro-ci.git
+git branch -M main
+git push -u origin main
+```
 
-1. **Créer un compte** sur [render.com](https://render.com) (gratuit)
+### 2. Créer le service sur Render
 
-2. **Créer un dépôt GitHub** et y uploader ce dossier :
-   ```bash
-   git init
-   git add .
-   git commit -m "SportyPro CI by Kouakou Cedric"
-   git branch -M main
-   git remote add origin https://github.com/TON_USERNAME/sportypro-ci.git
-   git push -u origin main
-   ```
+| Paramètre | Valeur |
+|-----------|--------|
+| Runtime | Python 3.11 |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120` |
+| Instance Type | Free |
 
-3. **Sur Render.com** :
-   - Cliquer sur **"New Web Service"**
-   - Connecter votre compte GitHub
-   - Sélectionner le dépôt `sportypro-ci`
-   - Render détecte automatiquement Python + le `render.yaml`
-   - Cliquer **"Deploy"**
+**Variables d'environnement à définir :**
 
-4. **Votre site sera live sur** : `https://sportypro-ci.onrender.com`
+| Clé | Valeur |
+|-----|--------|
+| `FOOTBALLDATA_KEY` | votre clé football-data.org |
+| `SECRET_KEY` | chaîne aléatoire longue |
 
-### Plan gratuit Render :
-- ✅ 512 MB RAM
-- ✅ Domaine automatique `*.onrender.com`
-- ✅ HTTPS gratuit
-- ✅ Auto-déploiement depuis GitHub
-- ⚠️ Le service "s'endort" après 15 min d'inactivité (plan gratuit)
+Le site sera live sur `https://sportypro-ci.onrender.com`.
 
----
+### 3. Éviter la mise en veille (plan gratuit)
 
-## 🔧 Autres hébergeurs compatibles
+Créer un moniteur sur [UptimeRobot](https://uptimerobot.com) :
 
-| Hébergeur | Gratuit | Remarque |
-|-----------|---------|----------|
-| **Render.com** ⭐ | ✅ | Recommandé — facile, Python natif |
-| **Railway.app** | ✅ (limité) | $5/mois après quota |
-| **PythonAnywhere** | ✅ | Spécialisé Python, très simple |
-| **Fly.io** | ✅ | Plus technique |
-| **Heroku** | ❌ | Plus de plan gratuit |
-
----
-
-## 📡 API utilisée
-
-**TheSportsDB** (https://www.thesportsdb.com/api.php)
-- Gratuit, sans inscription
-- Multi-sports : Football, Basketball, Tennis, MMA
-- Calendrier réel 2026/2027
-- Pas de limite sévère pour usage personnel
+- **URL** : `https://sportypro-ci.onrender.com/api/status`
+- **Intervalle** : 10 minutes
 
 ---
 
 ## 📁 Structure du projet
 
 ```
-sportytrader_cedric/
-├── app.py                  # Application Flask principale
-├── requirements.txt        # Dépendances Python
-├── Procfile               # Config déploiement
-├── render.yaml            # Config Render.com
-├── templates/
-│   ├── base.html          # Template de base (header/footer)
-│   ├── index.html         # Page d'accueil
-│   ├── sport.html         # Page par sport (Football, Basket…)
-│   ├── match.html         # Détail d'un match
-│   ├── pronostics.html    # Tous les pronostics
-│   └── resultats.html     # Résultats récents
-└── static/
-    ├── css/style.css      # Design complet (dark sports theme)
-    └── js/main.js         # Interactions JS
+sportypro-ci/
+├── app.py              # Application Flask (routes + logique + templates intégrés)
+├── requirements.txt    # Flask, requests, gunicorn, python-dotenv
+├── Procfile            # Config déploiement
+├── render.yaml         # Config Render.com
+└── .cache/             # Cache JSON auto-généré (TTL 2h)
+```
+
+> Les templates HTML sont intégrés directement dans `app.py` via `render_template_string`.
+
+---
+
+## 📡 API
+
+**football-data.org v4** — [docs.football-data.org](https://docs.football-data.org)
+- Clé gratuite sur inscription
+- Limite : 10 requêtes/minute (throttle intégré dans l'app)
+- Cache local 2h pour minimiser les appels
+
+---
+
+## 🔗 Endpoints utiles
+
+```
+/                          → Accueil — matchs du jour
+/?date=2026-05-10          → Matchs d'une date précise
+/api/status                → Santé de l'application (JSON)
 ```
 
 ---
 
-## 👤 Crédits
-
-**Développé par Kouakou Cedric** — 2026  
-Données : [TheSportsDB](https://www.thesportsdb.com)  
-Design : Dark Sports / Néon Green — inspiré de SportyTrader.com
+⚠️ *Les jeux d'argent peuvent être dangereux. Jouez de façon responsable. +18 uniquement.*
 
 ---
 
-⚠️ *Les jeux d'argent peuvent être dangereux. Jouez de façon responsable. +18 uniquement.*
+*Développé par Kouakou Cedric — 2026*
